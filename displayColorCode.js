@@ -1,11 +1,46 @@
 'use strict'
 
+var dialog = new Window("dialog"); 
+    dialog.text = "windowname"; 
+    dialog.preferredSize.width = 400; 
+    dialog.preferredSize.height = 200; 
+    dialog.spacing = 10; 
+    dialog.margins = 16; 
+
+var dropdown1_array = [
+  "#FFFFFF",
+  "FFFFFF",
+  "#FFFFFF[RGB]",
+  "FFFFFF[RGB]"
+]; 
+
+var dropdown1 = dialog.add("dropdownlist", undefined, undefined, {name: "dropdown1", items: dropdown1_array}); 
+    dropdown1.selection = 0; 
+    dropdown1.preferredSize.width = 400; 
+    dropdown1.preferredSize.height = 100; 
+
+var button1 = dialog.add("button", undefined, undefined, {name: "ok"}); 
+    button1.text = "押せ!"; 
+    button1.preferredSize.width = 400; 
+    button1.preferredSize.height = 100; 
+
+dialog.show();
+dialog.center();
+
 var pathItems = app.activeDocument.pathItems;
-var count = 0
-var r = 0;
-var g = 0;
-var b = 0;
-var metaInfo = ''
+var count = 0;
+var r, g, b = 0;
+var metaInfo = '';
+var addSharp = false; 
+var addMetaInfo = false; 
+var selected = dropdown1.selection.text
+// alert(selected.toSource())
+if(selected.indexOf('#') != -1){
+  addSharp = true;
+}
+if(selected.indexOf('[') != -1){
+  addMetaInfo = true;
+}
 
 for ( i = 0; i < pathItems.length; i++){
   var item = app.activeDocument.pathItems[i]
@@ -15,7 +50,7 @@ for ( i = 0; i < pathItems.length; i++){
       r = item.fillColor.red;
       g = item.fillColor.green;
       b = item.fillColor.blue;
-      metaInfo = '[RGB]'
+      if(addMetaInfo){metaInfo = '[RGB]\n'}
     }else if(item.fillColor.typename === "SpotColor"){
       var colors = item.fillColor.spot.name.replace(/(.=)/g, '')
       var colorsArray = colors.split(' ')
@@ -29,27 +64,31 @@ for ( i = 0; i < pathItems.length; i++){
       r = r + Number(onePercentOfRed * ratio)
       g = g + Number(onePercentOfGreen * ratio)
       b = b + Number(onePercentOfBlue * ratio )
-      metaInfo = '[SPOT]'
+      if(addMetaInfo){metaInfo = '[SPOT ' + item.fillColor.tint + "%]\n"}
     }
     var x = item.left+item.width+10;
     var y = item.top;
-    var rect = activeDocument.pathItems.rectangle(y, x, 100, 20);
+    var rect = activeDocument.pathItems.rectangle(y, x, 75, 40);
     var txtObj = activeDocument.textFrames.areaText(
       rect,
       TextOrientation.HORIZONTAL,
       undefined,
       true
     );
-    txtObj.contents = rgbToHex(r,g,b) + metaInfo
+    txtObj.contents = metaInfo + rgbToHex(r,g,b,addSharp)
   }
 }
 if(count == 0){
   alert("select filled path.\n塗りを確認したいパスを選択してください\n\n[hint] it dosent work at no-filled or textObject items.")
 }
 
-function rgbToHex(_r,_g,_b){
-  var r = ('00'+_r.toString(16).toUpperCase()).slice(-2);
-  var g = ('00'+_g.toString(16).toUpperCase()).slice(-2);
-  var b = ('00'+_b.toString(16).toUpperCase()).slice(-2);
-  return '#' + r+g+b;
+function rgbToHex(__r, __g, __b, __sharp){
+  var _r = ('00'+__r.toString(16).toUpperCase()).slice(-2);
+  var _g = ('00'+__g.toString(16).toUpperCase()).slice(-2);
+  var _b = ('00'+__b.toString(16).toUpperCase()).slice(-2);
+  var rgb = _r+_g+_b
+  if(__sharp){
+    return '#' + rgb;
+  }
+  return rgb;
 }
