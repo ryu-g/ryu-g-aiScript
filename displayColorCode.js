@@ -23,10 +23,7 @@ var button1 = dialog.add("button", undefined, undefined, {name: "ok"});
     button1.text = "押せ!"; 
     button1.preferredSize.width = 400; 
     button1.preferredSize.height = 100; 
-
-dialog.show();
-dialog.center();
-
+    
 var pathItems = app.activeDocument.pathItems;
 var count = 0;
 var r, g, b = 0;
@@ -34,7 +31,19 @@ var metaInfo = '';
 var addSharp = false; 
 var addMetaInfo = false; 
 var selected = dropdown1.selection.text
-// alert(selected.toSource())
+
+for ( i = 0; i < pathItems.length; i++){
+  var item = app.activeDocument.pathItems[i]
+  if(item.selected){
+    count++;
+  }
+}
+if(count > 0){
+  dialog.show();
+  dialog.center();
+}
+
+
 if(selected.indexOf('#') != -1){
   addSharp = true;
 }
