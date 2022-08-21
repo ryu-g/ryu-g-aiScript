@@ -1,7 +1,7 @@
 'use strict'
 
 var dialog = new Window("dialog"); 
-    dialog.text = "display color info"; 
+    dialog.text = "windowname"; 
     dialog.preferredSize.width = 400; 
     dialog.preferredSize.height = 200; 
     dialog.spacing = 10; 
@@ -10,9 +10,8 @@ var dialog = new Window("dialog");
 var dropdown1_array = [
   "#FFFFFF",
   "FFFFFF",
-  "[RGB] #FFFFFF",
-  "[RGB] FFFFFF",
-  "CMYK"
+  "#FFFFFF[RGB]",
+  "FFFFFF[RGB]"
 ]; 
 
 var dropdown1 = dialog.add("dropdownlist", undefined, undefined, {name: "dropdown1", items: dropdown1_array}); 
@@ -27,6 +26,11 @@ var button1 = dialog.add("button", undefined, undefined, {name: "ok"});
     
 var pathItems = app.activeDocument.pathItems;
 var count = 0;
+var r, g, b = 0;
+var metaInfo = '';
+var addSharp = false; 
+var addMetaInfo = false; 
+var selected = dropdown1.selection.text
 
 for ( i = 0; i < pathItems.length; i++){
   var item = app.activeDocument.pathItems[i]
@@ -39,17 +43,11 @@ if(count > 0){
   dialog.center();
 }
 
-var r, g, b, c, m, y, k = 0;
-var metaInfo = '';
-var addSharp = false; 
-var addMetaInfo = false; 
-var dropDownSelectedItem = dropdown1.selection.text
-var colorMode = ''
 
-if(dropDownSelectedItem.indexOf('#') != -1){
+if(selected.indexOf('#') != -1){
   addSharp = true;
 }
-if(dropDownSelectedItem.indexOf('[') != -1){
+if(selected.indexOf('[') != -1){
   addMetaInfo = true;
 }
 
@@ -58,20 +56,11 @@ for ( i = 0; i < pathItems.length; i++){
   if(item.selected){
     count++;
     if(item.fillColor.typename === "RGBColor"){
-      colorMode = 'RGB'
       r = item.fillColor.red;
       g = item.fillColor.green;
       b = item.fillColor.blue;
-      if(addMetaInfo){metaInfo = '['+colorMode+']\n';}
-    }else if(item.fillColor.typename === "CMYKColor"){
-      colorMode = 'CMYK'
-      c = item.fillColor.cyan;      
-      m = item.fillColor.magenta;      
-      y = item.fillColor.yellow;      
-      k = item.fillColor.black;
-      metaInfo = 'C' + c + ' M' + m + ' Y' + y + ' K'+ k
+      if(addMetaInfo){metaInfo = '[RGB]\n'}
     }else if(item.fillColor.typename === "SpotColor"){
-      colorMode = 'SPOT'
       var colors = item.fillColor.spot.name.replace(/(.=)/g, '')
       var colorsArray = colors.split(' ')
       var ratio = 100-item.fillColor.tint
@@ -84,28 +73,18 @@ for ( i = 0; i < pathItems.length; i++){
       r = r + Number(onePercentOfRed * ratio)
       g = g + Number(onePercentOfGreen * ratio)
       b = b + Number(onePercentOfBlue * ratio )
-      if(addMetaInfo){metaInfo = '[' + colorMode +' '+ item.fillColor.tint + "%]\n"}
+      if(addMetaInfo){metaInfo = '[SPOT ' + item.fillColor.tint + "%]\n"}
     }
     var x = item.left+item.width+10;
     var y = item.top;
-    var txtAreawidth = 75; // default size for RGB mode 
-    if(colorMode === "CMYK") {
-      txtAreawidth = 120;
-    }else{
-      txtAreawidth = 75;
-    }
-    var rect = activeDocument.pathItems.rectangle(y, x, txtAreawidth, 40);
+    var rect = activeDocument.pathItems.rectangle(y, x, 75, 40);
     var txtObj = activeDocument.textFrames.areaText(
       rect,
       TextOrientation.HORIZONTAL,
       undefined,
       true
     );
-    if(colorMode != "CMYK"){
-      txtObj.contents = metaInfo + rgbToHex(r,g,b,addSharp)
-    }else{
-      txtObj.contents = metaInfo
-    }
+    txtObj.contents = metaInfo + rgbToHex(r,g,b,addSharp)
   }
 }
 if(count == 0){
