@@ -10,18 +10,22 @@ var dialog = new Window("dialog");
 var dropdown1_array = [
   "#FFFFFF",
   "FFFFFF",
-  "[RGB] #FFFFFF",
-  "[RGB] FFFFFF",
+  "[RGB or SPOT] #FFFFFF",
+  "[RGB or SPOT] FFFFFF",
   "CMYK"
 ]; 
+
+var statictext = dialog.add("statictext",undefined,"select colorInfo view type\n" + "表示したい色情報の見た目を選択してください",{multiline:true}); 
+    statictext.preferredSize.width = 400; 
+    statictext.preferredSize.height = 50; 
 
 var dropdown1 = dialog.add("dropdownlist", undefined, undefined, {name: "dropdown1", items: dropdown1_array}); 
     dropdown1.selection = 0; 
     dropdown1.preferredSize.width = 400; 
-    dropdown1.preferredSize.height = 100; 
+    dropdown1.preferredSize.height = 50; 
 
 var button1 = dialog.add("button", undefined, undefined, {name: "ok"}); 
-    button1.text = "押せ!"; 
+    button1.text = "P U S H"; 
     button1.preferredSize.width = 400; 
     button1.preferredSize.height = 100; 
     
@@ -65,9 +69,9 @@ for ( i = 0; i < pathItems.length; i++){
       if(addMetaInfo){metaInfo = '['+colorMode+']\n';}
     }else if(item.fillColor.typename === "CMYKColor"){
       colorMode = 'CMYK'
-      c = item.fillColor.cyan;      
-      m = item.fillColor.magenta;      
-      y = item.fillColor.yellow;      
+      c = item.fillColor.cyan;
+      m = item.fillColor.magenta;
+      y = item.fillColor.yellow;
       k = item.fillColor.black;
       metaInfo = 'C' + c + ' M' + m + ' Y' + y + ' K'+ k
     }else if(item.fillColor.typename === "SpotColor"){
@@ -108,8 +112,9 @@ for ( i = 0; i < pathItems.length; i++){
     }
   }
 }
+
 if(count == 0){
-  alert("select filled path.\n塗りを確認したいパスを選択してください\n\n[hint] it dosent work at no-filled or textObject items.")
+  alert("select filled path.\n塗りを確認したいパスを先に選択してください。\n塗りが無いパス･テキストオブジェクト･グラデーションの塗りには正常に動作しません。\n\n[hint] it dosent work at no-filled path, textObject items, and gradient filled items.")
 }
 
 function rgbToHex(__r, __g, __b, __sharp){
